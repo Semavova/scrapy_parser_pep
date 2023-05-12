@@ -3,12 +3,13 @@ import datetime as dt
 from collections import defaultdict
 from pathlib import Path
 
+from pep_parse.settings import RESULTS_DIR
+
 BASE_DIR = Path(__file__).parent.parent
-RESULTS_DIR_NAME = 'results'
 DATETIME_FORMAT = '%Y-%m-%d_%H-%M-%S'
 PEP_TITLES = ('Статус', 'Количество')
-PEP_TOTAL = ('Всего')
-FILE_NAME = ('status_summary_{now_formatted}.csv')
+PEP_TOTAL = 'Всего'
+FILE_NAME = 'status_summary_{now_formatted}.csv'
 
 
 class PepParsePipeline:
@@ -21,21 +22,18 @@ class PepParsePipeline:
         return item
 
     def close_spider(self, spider):
-        results_dir = BASE_DIR / RESULTS_DIR_NAME
-        results_dir.mkdir(exist_ok=True)
-        results = [
-            PEP_TITLES,
-            *self.statuses.items(),
-            (PEP_TOTAL, sum(self.statuses.values()))
-        ]
-        now = dt.datetime.now()
-        now_formatted = now.strftime(DATETIME_FORMAT)
+        now_formatted = dt.datetime.now().strftime(DATETIME_FORMAT)
         file_name = FILE_NAME.format(now_formatted=now_formatted)
-        file_path = results_dir / file_name
+        file_path = BASE_DIR / RESULTS_DIR / file_name
         with open(file_path, 'w', encoding='utf-8') as f:
             csv.writer(
                 f,
-                dialect=csv.unix_dialect
+                dialect=csv.unix_dialect,
+                quoting=csv.QUOTE_NONE
             ).writerows(
-                results
+                [
+                    PEP_TITLES,
+                    *self.statuses.items(),
+                    (PEP_TOTAL, sum(self.statuses.values()))
+                ]
             )

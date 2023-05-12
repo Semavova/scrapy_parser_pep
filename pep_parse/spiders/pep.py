@@ -1,29 +1,21 @@
 import scrapy
+
 from pep_parse.items import PepParseItem
 
 
 class PepSpider(scrapy.Spider):
     name = 'pep'
     allowed_domains = ['peps.python.org']
-    start_urls = ['https://peps.python.org/']
+    start_urls = [f'https://{url}/' for url in allowed_domains]
 
     def parse(self, response):
-        all_peps = response.css('#numerical-index tbody a[href]')
-        for pep_link in all_peps:
+        for pep_link in response.css('#numerical-index tbody a[href]'):
             yield response.follow(pep_link, callback=self.parse_pep)
 
     def parse_pep(self, response):
-        data = {
-            'number': int(
-                response.css(
-                    'head title::text'
-                ).get().replace('PEP ', '').split(' – ')[0]
-            ),
-            'name': response.css(
-                'head title::text'
-            ).get().split(' – ')[-1].split(' |')[0],
-            'status': response.css(
-                'dt:contains("Status") + dd abbr::text'
-            ).get(),
-        }
-        yield PepParseItem(data)
+        title = response.css('head title::text').get().split(' – ')
+        yield PepParseItem(
+            number=title[0].replace('PEP ', ''),
+            name=title[1].split(' |')[0],
+            status=response.css('dt:contains("Status") + dd abbr::text').get(),
+        )
