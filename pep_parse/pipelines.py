@@ -15,6 +15,10 @@ DIR_NOT_FOUND = 'Не найдена папка для сохранения ре
 
 class PepParsePipeline:
 
+    def __init__(self):
+        self.results_dir = BASE_DIR / RESULTS_DIR
+        self.results_dir.mkdir(exist_ok=True)
+
     def open_spider(self, spider):
         self.statuses = defaultdict(int)
 
@@ -25,19 +29,16 @@ class PepParsePipeline:
     def close_spider(self, spider):
         now_formatted = dt.datetime.now().strftime(DATETIME_FORMAT)
         file_name = FILE_NAME.format(now_formatted=now_formatted)
-        file_path = BASE_DIR / RESULTS_DIR / file_name
-        try:
-            with open(file_path, 'w', encoding='utf-8') as f:
-                csv.writer(
-                    f,
-                    dialect=csv.unix_dialect,
-                    quoting=csv.QUOTE_NONE
-                ).writerows(
-                    [
-                        PEP_TITLES,
-                        *self.statuses.items(),
-                        (PEP_TOTAL, sum(self.statuses.values()))
-                    ]
-                )
-        except FileNotFoundError:
-            raise FileNotFoundError(DIR_NOT_FOUND)
+        file_path = self.results_dir / file_name
+        with open(file_path, 'w', encoding='utf-8') as f:
+            csv.writer(
+                f,
+                dialect=csv.unix_dialect,
+                quoting=csv.QUOTE_NONE
+            ).writerows(
+                [
+                    PEP_TITLES,
+                    *self.statuses.items(),
+                    (PEP_TOTAL, sum(self.statuses.values()))
+                ]
+            )
