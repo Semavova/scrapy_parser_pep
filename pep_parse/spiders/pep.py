@@ -13,9 +13,11 @@ class PepSpider(scrapy.Spider):
             yield response.follow(pep_link, callback=self.parse_pep)
 
     def parse_pep(self, response):
-        title = response.css('head title::text').get().split(' – ')
+        number, name = response.css(
+            'head title::text'
+        ).get().split(' – ', maxsplit=1)
         yield PepParseItem(
-            number=title[0].replace('PEP ', ''),
-            name=title[1].split(' |')[0],
+            number=number.replace('PEP ', ''),
+            name=name.replace(' | peps.python.org', ''),
             status=response.css('dt:contains("Status") + dd abbr::text').get(),
         )

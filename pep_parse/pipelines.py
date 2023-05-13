@@ -10,6 +10,7 @@ DATETIME_FORMAT = '%Y-%m-%d_%H-%M-%S'
 PEP_TITLES = ('Статус', 'Количество')
 PEP_TOTAL = 'Всего'
 FILE_NAME = 'status_summary_{now_formatted}.csv'
+DIR_NOT_FOUND = 'Не найдена папка для сохранения результата'
 
 
 class PepParsePipeline:
@@ -25,15 +26,18 @@ class PepParsePipeline:
         now_formatted = dt.datetime.now().strftime(DATETIME_FORMAT)
         file_name = FILE_NAME.format(now_formatted=now_formatted)
         file_path = BASE_DIR / RESULTS_DIR / file_name
-        with open(file_path, 'w', encoding='utf-8') as f:
-            csv.writer(
-                f,
-                dialect=csv.unix_dialect,
-                quoting=csv.QUOTE_NONE
-            ).writerows(
-                [
-                    PEP_TITLES,
-                    *self.statuses.items(),
-                    (PEP_TOTAL, sum(self.statuses.values()))
-                ]
-            )
+        try:
+            with open(file_path, 'w', encoding='utf-8') as f:
+                csv.writer(
+                    f,
+                    dialect=csv.unix_dialect,
+                    quoting=csv.QUOTE_NONE
+                ).writerows(
+                    [
+                        PEP_TITLES,
+                        *self.statuses.items(),
+                        (PEP_TOTAL, sum(self.statuses.values()))
+                    ]
+                )
+        except FileNotFoundError:
+            raise FileNotFoundError(DIR_NOT_FOUND)
