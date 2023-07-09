@@ -14,30 +14,30 @@
 ## Как запустить проект:
 Клонировать репозиторий и перейти в него в командной строке:
 
-```
+```bash
 git clone https://github.com/Semavova/scrapy_parser_pep.git
 ```
 
 Создать и активировать виртуальное окружение:
-```
+```bash
 python -m venv env
 ```
 
-```
+```bash
 source venv/Scripts/activate
 ```
 
 Обновить менеджер пакетов pip и установить зависимости из файла requirements.txt:
-```
+```bash
 python -m pip install --upgrade pip
 ```
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
 ## Запуск парсера
-```
+```bash
 scrapy crawl pep
 ```
 
